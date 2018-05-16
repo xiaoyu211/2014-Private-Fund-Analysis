@@ -1,0 +1,175 @@
+
+
+```{r}
+sec201205 <- read.csv("~/Desktop/SEC Registered Adviser Report 5-1-2012.csv", stringsAsFactors=FALSE)[,c(1:5,45,77,131)]
+sec201305 <- read.csv("~/Desktop/SEC Registered Investment Adviser Report 2013-5-1.csv", stringsAsFactors=FALSE)[,c(1:5,45,98,154)]
+sec201405 <- read.csv("~/Desktop/SEC Registered Investment Adviser Report 2014-5-1.csv", stringsAsFactors=FALSE)[,c(1:5,46,100,156)]
+
+```
+
+# recode the variable SEC.Region from 201205
+```{r}
+sec201205$GEOG <- "OTHER"
+sec201205$GEOG[sec201205$SEC.Region %in% c("NYRO")] <- "NYRO"
+sec201205$GEOG[sec201205$SEC.Region %in% c("BRO")] <- "BRO"
+sec201205$GEOG[sec201205$SEC.Region %in% c("CHRO")] <- "CHRO"
+sec201205$GEOG[sec201205$SEC.Region %in% c("LARO","SFRO")] <- "CARO"
+
+# recode the variable SEC.Region from 201305
+sec201305$GEOG <- "OTHER"
+sec201305$GEOG[sec201305$SEC.Region %in% c("NYRO")] <- "NYRO"
+sec201305$GEOG[sec201305$SEC.Region %in% c("BRO")] <- "BRO"
+sec201305$GEOG[sec201305$SEC.Region %in% c("CHRO")] <- "CHRO"
+sec201305$GEOG[sec201305$SEC.Region %in% c("LARO","SFRO")] <- "CARO"
+
+# recode the variable SEC.Region from 201405
+sec201405$GEOG <- "OTHER"
+sec201405$GEOG[sec201405$SEC.Region %in% c("NYRO")] <- "NYRO"
+sec201405$GEOG[sec201405$SEC.Region %in% c("BRO")] <- "BRO"
+sec201405$GEOG[sec201405$SEC.Region %in% c("CHRO")] <- "CHRO"
+sec201405$GEOG[sec201405$SEC.Region %in% c("LARO","SFRO")] <- "CARO"
+```
+
+# 1. For each of the regions (or by region), please show us in tabular form and by using a graphic how question 7B (possibly called X7B) changed from 2012 to 2014.
+
+
+```{r}
+# For 2012
+## clean up missing values
+sec201205$X7B[sec201205$X7B==""] <- NA
+sec201205$X7B <- as.factor(sec201205$X7B)
+prop.table(table(sec201205$X7B))
+A1 <- table(sec201205$GEOG,sec201205$X7B)
+prop.table(A1,1) ## row.proportions
+chisq.test(A1)
+
+# For 2013
+sec201305$X7B[sec201305$X7B ==""] <- NA
+sec201305$X7B <- as.factor(sec201305$X7B)
+prop.table(table(sec201305$X7B))
+A2 <- table(sec201305$GEOG,sec201305$X7B)
+prop.table(A2,1) ## row.proportions
+chisq.test(A2)
+
+# For 2014
+sec201405$X7B[sec201405$X7B==""] <- NA
+sec201405$X7B <- as.factor(sec201405$X7B)
+prop.table(table(sec201405$X7B))
+A3 <- table(sec201405$GEOG,sec201405$X7B)
+prop.table(A3,1) ## row.proportions
+chisq.test(A3)
+```
+
+
+```{r}
+require(ggplot2)
+require(grid)
+vplayout <- function(x, y) viewport(layout.pos.row = x, layout.pos.col = y)
+
+plot1 <- ggplot(sec201205, aes(GEOG, fill = X7B)) + geom_bar(position = "dodge") + ggtitle("YEAR 2012") + ylim(0, 7000)
+
+plot2 <- ggplot(sec201305, aes(GEOG, fill = X7B)) + geom_bar(position = "dodge") + ggtitle("YEAR 2013") + ylim(0, 7000)
+
+plot3 <- ggplot(sec201405, aes(GEOG, fill = X7B)) + geom_bar(position = "dodge") + ggtitle("YEAR 2014") + ylim(0, 7000)
+
+grid.newpage()
+pushViewport(viewport(layout = grid.layout(3, 1)))
+print(plot1, vp = vplayout(1, 1))
+print(plot2, vp = vplayout(2, 1))
+print(plot3, vp = vplayout(3, 1))
+```
+
+
+# 2. For each of the regions (or by region), please describe the differences between firms who answered "Y" to 7B and those who answered "N" in 2012 and compare them with firms to answered in 2014.
+
+
+```{r}
+prop.table(A1,1)[,1]
+prop.table(A1,1)[,2]
+
+#Difference between who answer "NO" and "YES" in 2012
+dif2012 <- c(prop.table(A1,1)[,1] - prop.table(A1,1)[,2])
+dif2012
+
+#Difference between who answer "NO" and "YES" in 2014
+dif2014 <- c(prop.table(A3,1)[,1] - prop.table(A3,1)[,2])
+dif2014
+
+diff <- rbind(dif2012,dif2014)
+diff
+```
+
+Based on our table, we see that the differences between firms who answered "Y" to 7B and those who answered "N" in 2012 are higher than 2014. 
+
+We can conlude that for BR, CA, CH, AND OTHER regions, more people become to an adviser to private fund in 2014, but for NY region, the number of people become to an adviser is decresed.
+
+
+#3. For each of the regions (or by region), please show us in tabular form and by using a graphic how question 3A (possibly called X3A) changed from 2012 to 2014.
+
+
+```{r}
+sec201205$X3A[sec201205$X3A==""] <- NA
+sec201305$X3A[sec201305$X3A==""] <- NA
+sec201405$X3A[sec201405$X3A==""] <- NA
+
+table(sec201205$X3A,sec201205$GEOG)
+table(sec201305$X3A,sec201305$GEOG)
+table(sec201405$X3A,sec201405$GEOG)
+
+ggplot(sec201205, aes(x= X3A, fill= X3A)) + geom_bar(position = "dodge")  + facet_grid(. ~ GEOG) + xlab("Regions") + ylab("Total NC") + ggtitle("Form of Organization 2012") + ylim(0, 1000) + theme(axis.text.x = element_text(size = 7, angle = 45, hjust = 1, vjust = 1))
+
+ggplot(sec201305, aes(x= X3A, fill= X3A)) + geom_bar(position = "dodge")  + facet_grid(. ~ GEOG) + xlab("Regions") + ylab("Total NC") + ggtitle("Form of Organization 2013") + ylim(0, 1000) + theme(axis.text.x = element_text(size = 7, angle = 45, hjust = 1, vjust = 1))
+  
+ggplot(sec201405, aes(x= X3A, fill= X3A)) + geom_bar(position = "dodge")  + facet_grid(. ~ GEOG) + xlab("Regions") + ylab("Total NC") + ggtitle("Form of Organization 2014") + ylim(0, 1000) + theme(axis.text.x = element_text(size = 7, angle = 45, hjust = 1, vjust = 1))
+
+# Percentage of each form of organization by Region
+# 2012-2014
+round(prop.table(table(sec201205$X3A,sec201205$GEOG),1), digits = 2)
+round(prop.table(table(sec201405$X3A,sec201405$GEOG),1), digits = 2)
+```
+
+#5. For each of the regions (or by region), please show us in tabular form and by using a graphic how question 5F2c (possibly called X5F.2..c) changed from 2012 to 2014.
+
+
+```{r}
+require(scales)
+sec201205[,7] <- as.numeric(gsub(",","",sec201205[,7]))
+
+sec201305[,7] <- as.numeric(gsub(",","",sec201305[,7]))
+
+sec201405[,7] <- as.numeric(gsub(",","",sec201405[,7]))
+
+vplayout <-function(x, y) viewport(layout.pos.row = x, layout.pos.col = y)
+
+plot1 <- ggplot(sec201205, aes(x = GEOG, y = X5F.2..c., fill = GEOG)) + geom_bar(stat = "identity") + xlab("Regions") + ylab("Total NC") + ggtitle("Total RAUM OF 2012") + ylim(0, 30000000000000)
+
+plot2 <- ggplot(sec201305, aes(x = GEOG, y = X5F.2..c., fill = GEOG)) + geom_bar(stat = "identity") + xlab("Regions") + ylab("Total NC") + ggtitle("Total RAUM OF 2013") + ylim(0, 30000000000000)
+  
+plot3 <- ggplot(sec201405, aes(x = GEOG, y = X5F.2..c., fill= GEOG)) + geom_bar(stat = "identity") + xlab("Regions") + ylab("Total NC") + ggtitle("Total RAUM OF 2014") + ylim(0, 30000000000000)
+
+grid.newpage()
+pushViewport(viewport(layout = grid.layout(3, 1)))
+print(plot1, vp = vplayout(1, 1))
+print(plot2, vp = vplayout(2, 1))
+print(plot3, vp = vplayout(3, 1))
+
+t1 <- tapply(sec201205$X5F.2..c.,sec201205$GEOG, sum)
+t2 <- tapply(sec201305$X5F.2..c.,sec201305$GEOG, sum)
+t3 <- tapply(sec201405$X5F.2..c.,sec201405$GEOG, sum)
+total <- c(t1,t2,t3)
+
+# total RAUM in 2012-2014
+RAUM_total <- matrix(dollar_format()(total), nrow = 3, ncol= 5, byrow =T)
+colnames(RAUM_total) <- c("CA", "IL", "MA", "NY", "OTHER")
+rownames(RAUM_total) <- c("2012", "2013" ,"2014")
+print(RAUM_total)
+
+# percentage of total RAUM in 2012-2014
+rate_increase <- t3/t1-1
+rate_increase
+```
+
+Based on the plot and table,NY and CA aloways have the most toalt RAUM from 2012 to 2014, alos their RAUM gradually increased from 2012 t0 2014, CA increased 22%, and NY increased 27%.
+
+
+
