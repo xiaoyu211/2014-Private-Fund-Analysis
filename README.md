@@ -1,0 +1,2 @@
+# 2014-Private-Fund-Analysis
+#This report provides an understanding of the private fund advisers and about how private funds are overseen by regulators and monitored by investors. Private funds are not homogeneous. They vary in size, investment strategy, invest- ment style, and a variety of other traits and characteristics. We try to provide unique perspectives of California fund advisers and investors.
